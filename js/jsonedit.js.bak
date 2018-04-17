@@ -1,0 +1,442 @@
+
+var app = angular.module('jsonedit', ['schemaForm','base64','ngRoute']);
+
+function getSearchParam( param ) {
+  var res = window.location.search.match( '(\\?|&)' + param + '=([^&]*)');
+  if (res) return res[2];
+  else return "";
+}
+
+app.config(function($routeProvider) {
+  $routeProvider
+    .when("/jsonedit", {
+        templateUrl : "template/jsonedit.html",
+        controller : "AppCtrl"
+    })
+    .otherwise({
+        templateUrl : "template/login.html",
+        controller : "LoginCtrl"
+    });
+});
+
+app.factory('connection', function($base64,$http) {
+    var authVal = "";
+    var user = "";
+    var repo = "";
+    var path = "";
+    var data = [];
+
+    var connectionService = {};
+    connectionService.setConnectionParams = function(p_user,p_repo,p_path,p_password) {
+      user = p_user;
+      repo = p_repo;
+      path = p_path;
+      authVal = "Basic " + $base64.encode( p_user + ":" + p_password );
+    }
+    connectionService.loadData = function(onSuccess,onError) {
+      if(authVal=="") {
+        console.error( "Connection Paramter sind nicht gesetzt.");
+        return;
+      }
+      $http({
+          method: 'GET',
+          // bitbucket server
+          // url: "https://api.bitbucket.org/1.0/projects",
+          // bitbucket cloud
+          url: "https://api.bitbucket.org/2.0/repositories/" + user + "/" + repo + "/src/master/" + path,
+          headers: { "Content-Type": "application/json", "Authorization": authVal }
+      })
+      .then( function(response) {
+        data = response.data;
+        onSuccess( response );
+      },function(response) {
+        authVal = "";
+        data = [];
+        onError( response );
+      });
+    };
+
+    return connectionService;
+});
+
+app.controller('LoginCtrl', function($scope, $location, connection) {
+  $scope.user = getSearchParam("user");
+  $scope.repo = getSearchParam("repo");
+  $scope.path = getSearchParam("path");
+  $scope.formSubmit = function() {
+    // check login - get file
+    //var authVal = "Basic " + $base64.encode( $scope.user + ":" + $scope.password );
+    //curl --user ZachKull:7rasSnvd4P3PcX6KfePM https://api.bitbucket.org/1.0/user/repositories
+    $http({
+        method: 'GET',
+        // bitbucket server
+        // url: "https://api.bitbucket.org/1.0/projects",
+        // bitbucket cloud
+        url: "https://api.bitbucket.org/2.0/repositories/" + $scope.user + "/" + $scope.repo + "/src/master/" + $scope.path,
+        headers: { "Content-Type": "application/json", "Authorization": authVal }
+    })
+    .then( function(response) {
+      $scope.error = '';
+      $scope.authVal = authVal;
+      //$scope.user = '';
+      //$scope.password = '';
+      $scope.data = response.data;
+      //console.log(response.data);
+      $location.path("/jsonedit");
+    },function(response) {
+      console.log(response);
+      $scope.error = response.data.error.message + "! (" + response.status + ")";
+      $scope.authVal = "";
+      $scope.data = "";
+    });
+  };
+});
+app.controller('AppCtrl', function($scope, $http, $location) {
+
+  $scope.navbarMode = 'default';
+
+  console.log("AppCtrl");
+  console.log($scope.data);
+
+  // Load data from gist.
+  /*
+  if ($location.path().length > 4) {
+    $scope.navbarMode = 'loaded';
+    var gistId = $location.path().replace('/','');
+    $scope.loading = true;
+    $http.get('https://api.github.com/gists/' + gistId).success(function(res) {
+      $scope.error = null;
+      $scope.tests.unshift({name: 'Gist'});
+      $scope.selectedTest = $scope.tests[0];
+      $scope.loadedData = {
+        created: moment(res.created_at).fromNow(),
+        user: res.user !== null ? res.user.login : 'Anonymous'
+      }
+      $scope.loading = false;
+      $scope.schemaJson = res.files['schema.json'].content;
+      $scope.formJson   = res.files['form.json'].content;
+      $scope.modelData  = JSON.parse(res.files['model.json'].content);
+    }).error(function() {
+      $scope.loadedData = 'dummy';
+      $scope.error = 'Failed to load gist.';
+    });
+  }*/
+
+  $scope.schema = {
+    "type": "object",
+    "properties": {
+      "code": {
+        "type": "integer"
+      },
+      "fos_ftyp_name": {
+        "type": "string"
+      },
+      "fzg": {
+        "type": "string"
+      },
+      "estimated": {
+        "type": "integer"
+      },
+      "gattung": {
+        "type": "string"
+      },
+      "taramass": {
+        "type": "integer"
+      },
+      "ges_mass": {
+        "type": "integer"
+      },
+      "ges_ax_fzg": {
+        "type": "integer"
+      },
+      "status": {
+        "type": "string"
+      },
+      "betriebsmodi": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "properties": {
+            "betriebsmodus": {
+              "type": "string"
+            },
+            "fzg_zugreihe": {
+              "type": "string"
+            },
+            "al_u_kl": {
+              "type": "integer"
+            },
+            "vzul": {
+              "type": "integer"
+            },
+            "drehgestelle": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "properties": {
+                  "n_dg": {
+                    "type": "integer"
+                  },
+                  "n_ax": {
+                    "type": "integer"
+                  },
+                  "q0": {
+                    "type": "number"
+                  },
+                  "mu": {
+                    "type": "integer"
+                  },
+                  "drad": {
+                    "type": "number"
+                  },
+                  "wb_r600_1200": {
+                    "type": "number"
+                  },
+                  "wb_r400_600": {
+                    "type": "number"
+                  },
+                  "wb_r300_400": {
+                    "type": "number"
+                  },
+                  "wb_r300": {
+                    "type": "number"
+                  },
+                  "yw_neu": {
+                    "type": "number"
+                  },
+                  "a_wb": {
+                    "type": "number"
+                  },
+                  "b_wb": {
+                    "type": "number"
+                  },
+                  "typ_wb": {
+                    "type": "string"
+                  },
+                  "abw1": {
+                    "type": "number"
+                  },
+                  "abw2": {
+                    "type": "number"
+                  },
+                  "abw3": {
+                    "type": "integer"
+                  },
+                  "abw5": {
+                    "type": "number"
+                  },
+                  "abw6": {
+                    "type": "number"
+                  },
+                  "fehlerabw": {
+                    "type": "number"
+                  },
+                  "interpol_fakt": {
+                    "type": "integer"
+                  },
+                  "sim_q0_max": {
+                    "type": "number"
+                  },
+                  "q0_quelle": {
+                    "type": "string"
+                  },
+                  "mu_quelle": {
+                    "type": "string"
+                  },
+                  "schaetzung": {
+                    "type": "string"
+                  },
+                  "c_typ": {
+                    "type": "string"
+                  },
+                  "c_a": {
+                    "type": "number"
+                  },
+                  "c_b": {
+                    "type": "number"
+                  },
+                  "c_c": {
+                    "type": "number"
+                  },
+                  "c_d": {
+                    "type": "number"
+                  },
+                  "c_e": {
+                    "type": "number"
+                  },
+                  "c_f": {
+                    "type": "number"
+                  },
+                  "c_g": {
+                    "type": "integer"
+                  },
+                  "c_h": {
+                    "type": "number"
+                  },
+                  "c_i": {
+                    "type": "number"
+                  },
+                  "c_j": {
+                    "type": "number"
+                  },
+                  "smpck": {
+                    "type": "object",
+                    "properties": {
+                      "smpck_file": {
+                        "type": "string"
+                      },
+                      "anz_tax": {
+                        "type": "integer"
+                      },
+                      "fzg1": {
+                        "type": "string"
+                      },
+                      "fzg_part": {
+                        "type": "string"
+                      },
+                      "smp_name_zuord": {
+                        "type": "string"
+                      },
+                      "bm": {
+                        "type": "string"
+                      },
+                      "bn": {
+                        "type": "string"
+                      },
+                      "bo": {
+                        "type": "string"
+                      },
+                      "bp": {
+                        "type": "number"
+                      },
+                      "bq": {
+                        "type": "number"
+                      },
+                      "br": {
+                        "type": "number"
+                      },
+                      "bs": {
+                        "type": "number"
+                      },
+                      "bt": {
+                        "type": "number"
+                      },
+                      "bu": {
+                        "type": "number"
+                      },
+                      "bv": {
+                        "type": "number"
+                      },
+                      "bw": {
+                        "type": "number"
+                      },
+                      "bx": {
+                        "type": "number"
+                      },
+                      "by": {
+                        "type": "number"
+                      },
+                      "bz": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  };
+
+  $scope.form = [
+    {key: "code"},
+    /*{key: "fos_ftyp_name"},
+    {key: "fzg"},
+    {key: "estimated"},
+    {key: "gattung"},
+    {key: "taramass"},
+    {key: "ges_mass"},
+    {key: "ges_ax_fzg"},
+    {key: "status"},*/
+    {key: "betriebsmodi", type: "tabarray", title: "{{ value.betriebsmodus || 'Tab '+$index }}", remove: "Remove Betriebsmodus",
+  	items: [
+  	  {key: "betriebsmodi[].betriebsmodus"},
+  	  /*{key: "betriebsmodi[].fzg_zugreihe"},
+  	  {key: "betriebsmodi[].al_u_kl"},
+  	  {key: "betriebsmodi[].vzul"},*/
+
+  	  {key: "betriebsmodi[].drehgestelle", type: "tabarray", title: "{{ 'DG '+$index }}", tabType: "top", remove: "Remove Drehgestell",
+  		items: [
+  		  /*{key: "betriebsmodi[].drehgestelle[].n_dg"},
+  		  {key: "betriebsmodi[].drehgestelle[].n_ax"},
+  		  {key: "betriebsmodi[].drehgestelle[].q0"},*/
+  		  {key: "betriebsmodi[].drehgestelle[].mu"},
+        {key: "betriebsmodi[].drehgestelle[].typ_wb"}//,
+        /*{type: "tabs",
+        tabs: [
+          { title: "smpck", items: [{key: "betriebsmodi[].drehgestelle[].smpck", type: "section"}]}
+        ]}*/
+  	  ]}
+  	]},
+    {type: "submit", title: "Save"}
+  ];
+
+  $scope.model = {};
+
+  $scope.decorator = 'bootstrap-decorator';
+
+  var setNewData = function(data) {
+    $scope.schema = data.schema;
+    $scope.form   = data.form;
+    $scope.schemaJson = JSON.stringify($scope.schema,undefined,2);
+    $scope.formJson   = JSON.stringify($scope.form,undefined,2);
+    $scope.modelData = data.model || {};
+  };
+
+  $scope.save = function() {
+    // To be able to save invalid json and point out errors, we
+    // don't save the schema/form but rather the ones in the input.
+
+    $scope.navbarMode = 'saved';
+
+    var gist = {
+      "description": "A saved configuration for a schema form example, http://textalk.github.io/angular-schema-form/examples/bootstrap-example.html",
+      "public": true,
+      "files": {
+        "schema.json": {
+          "content": $scope.schemaJson
+        },
+        "form.json": {
+          "content": $scope.formJson
+        },
+        "model.json": {
+          "content": JSON.stringify($scope.modelData, undefined, 2)
+        }
+      }
+    };
+
+    $http.post('https://api.github.com/gists', gist).success(function(data) {
+      $scope.error = null;
+      $location.path('/' + data.id);
+      $scope.savedGistData = {
+        data: data,
+        url: $location.absUrl()
+      };
+    }).error(function() {
+      $scope.error = 'Failed to save gist.';
+    });
+  };
+
+  $scope.submitForm = function(form) {
+    // First we broadcast an event so all fields validate themselves
+    $scope.$broadcast('schemaFormValidate');
+    // Then we check if the form is valid
+    //if (form.$valid) {
+    //  alert('You did it!');
+    //}
+    console.log(JSON.stringify($scope.model,undefined,2));
+  };
+
+});

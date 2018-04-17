@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "angular": "^1.6.9",
+    "angular-base64": "^2.0.5",
+    "angular-datatables": "^0.6.2",
+    "angular-route": "^1.6.9",
+    "angular-schema-form-bootstrap": "git+https://github.com/zzeekk/angular-schema-form-bootstrap.git#develop",
+    "angular-ui-bootstrap": "^2.5.6",
+    "bootstrap-vertical-tabs": "^1.2.2",
+    "bootstrap3": "^3.3.5",
+    "jquery": "^3.3.1"
+  }
+}

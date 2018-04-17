@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>stammdateneditor</title>
+  <link rel="stylesheet" href="node_modules/bootstrap3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="node_modules/bootstrap3/dist/css/bootstrap-theme.min.css">
+  <link rel="stylesheet" href="node_modules/bootstrap-vertical-tabs/bootstrap.vertical-tabs.min.css">
+  <link rel="stylesheet" href="node_modules/angular-datatables/dist/css/angular-datatables.min.css">
+  <link rel="stylesheet" href="node_modules/angular-datatables/dist/plugins/bootstrap/datatables.bootstrap.min.css">
+  <style type="text/css">
+
+  .alert .form-group {
+    margin-bottom: 0px;
+  }
+
+  .red {
+    border: 1px solid red;
+    background: #fee;
+  }
+
+  [ng\:cloak], [ng-cloak], [data-ng-cloak], [x-ng-cloak], .ng-cloak, .x-ng-cloak {
+    display: none !important;
+  }
+
+  .navbar-form > .form-group > .input-group {
+    margin-left: 20px;
+  }
+
+  .btn:active,
+  .btn:focus,
+  .btn.active {
+    background-image: none;
+    outline: 0;
+    -webkit-box-shadow: none;
+            box-shadow: none;
+  }
+
+  .error {
+    color: red;
+  }
+
+  .input-group-btn:last-child>.btn:not(:last-child):not(.dropdown-toggle) {
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+  }
+
+  /* make border around tabs */
+  .tab-content {
+    border: 1px solid #ddd;
+    border-top-color: transparent;
+    padding: 10px 10px 10px 10px;
+    margin-bottom: 10px;
+  }
+
+  /* reduce distance between left tabs and content */
+  .col-xs-3 {
+    padding-right: 0;
+  }
+  .col-xs-9 {
+    padding-left: 0;
+  }
+  .tabs-left {
+    border-right: 0px;
+  }
+
+  th, td {
+    white-space: nowrap;
+  }
+
+  /* tweak tabarray panels */
+  .schema-form-tabarray .panel-body .col-xs-3 {
+    padding-left: 0px;
+  }
+  .schema-form-tabarray .panel-body .col-xs-9 {
+    padding-right: 0px;
+  }
+  .schema-form-tabarray .panel-body .tab-content {
+    border-right-color: transparent;
+    border-bottom-color: transparent;
+    padding: 0px 0px 0px 15px;
+    margin-bottom: 0px;
+  }
+
+</style>
+</head>
+<body ng-app="jsonedit" ng-cloak>
+
+<div class="col-md-12">
+  <div ng-view></div>
+  <!--div><pre ng-cloak>{{pretty()}}</pre></div-->
+</div>
+
+<script type="text/ng-template" id="template/jsonedit.html">
+  <div class="container-fluid">
+    <div class="row" style="margin-bottom:10px">
+      <div ng-class="{'col-md-12': !selectedRow, 'col-md-6': selectedRow}">
+        <h3>Fahrzeugstammdaten
+          <button class="btn btn-primary pull-right"
+                  type="submit" ng-click="logout()">Logout</button>
+          <button class="btn btn-primary btn-success pull-right" ng-show="dataDirty" style="margin-right:10px;"
+                  type="submit" ng-click="save()">Speichern</button>
+        </h3>
+        <table datatable="" dt-options="tableOptions" dt-columns="tableCols" dt-instance="tableInstance" class="table table-hover"></table>
+      </div>
+      <div ng-show="selectedRow" class="col-md-6" ng-style="formStyle">
+        <h3>Fahrzeug editieren
+          <button class="btn btn-primary pull-right" ng-class="{'btn-danger': ngform.$invalid, 'btn-success': ngform.$valid}"
+                  type="submit" ng-show="editObjDirty" ng-click="updateObj(ngform)">Aktualisieren</button>
+        </h3>
+        <form name="ngform" sf-model="editObj" sf-form="formDef" sf-schema="formSchema" style="margin-top: 15px;"></form>
+      </div>
+    </div>
+  </div>
+</script>
+
+<script type="text/ng-template" id="template/login.html">
+  <h3>Login</h3>
+  <form name="loginform" ng-submit="formSubmit()" class="form">
+    <div class="col-md-4">
+      <div class="form-group">
+        <input type="text" class="form-control" ng-model="user" placeholder="username" required=""/>
+      </div>
+      <div class="form-group">
+        <input type="password" class="form-control" ng-model="password" placeholder="password" required=""/>
+      </div>
+      <div class="form-group">
+        <input type="text" class="form-control" ng-model="repo" placeholder="repository name" required=""/>
+      </div>
+      <div class="form-group">
+        <input type="text" class="form-control" ng-model="path" placeholder="path to repo file" required="" ng-pattern="/^.*\.json$/i"/>
+      </div>
+      <div class="form-group">
+        <button type="submit" class="btn btn-success">Login</button>
+        <span class="text-danger">{{ error }}</span>
+      </div>
+      <div ng-show="loginform.$valid"><em>Form is valid</em></div>
+      <div ng-show="loginform.$invalid"><em>Form is not valid</em></div>
+    </div>
+  </form>
+</script>
+
+<script type="text/javascript" src="node_modules/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="node_modules/tv4/tv4.js"></script>
+<script type="text/javascript" src="node_modules/angular/angular.js"></script>
+<script type="text/javascript" src="node_modules/angular-sanitize/angular-sanitize.min.js"></script>
+<script type="text/javascript" src="node_modules/angular-route/angular-route.min.js"></script>
+<script type="text/javascript" src="node_modules/angular-base64/angular-base64.min.js"></script>
+<script type="text/javascript" src="node_modules/datatables.net/js/jquery.dataTables.js"></script>
+<script type="text/javascript" src="node_modules/angular-datatables/dist/angular-datatables.min.js"></script>
+<script type="text/javascript" src="node_modules/angular-datatables/dist/plugins/bootstrap/angular-datatables.bootstrap.min.js"></script>
+<script type="text/javascript" src="node_modules/angular-ui-bootstrap/dist/ui-bootstrap.js"></script>
+
+<!--the following bug isn't yet fixed on master: https://github.com/json-schema-form/angular-schema-form/pull/672/commits/e78ecc890d329aa824ffc86cb894a1f7a4cec124-->
+<!--- we now use develop version with bootstrap extensions for collapsible fieldset/tabarray @ https://github.com/zzeekk/angular-schema-form-bootstrap.git#develop-->
+<!--- the file angular-schema-form-bootstrap-bundled.min.js as angular-schema-form bundled -->
+<script type="text/javascript" src="node_modules/angular-schema-form-bootstrap/dist/angular-schema-form-bootstrap-bundled.min.js"></script>
+
+<script type="text/javascript" src="js/jsonedit.js"></script>
+</body>
+</html>
