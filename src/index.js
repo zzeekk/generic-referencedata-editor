@@ -47,11 +47,10 @@ app.config(function($routeProvider) {
     });
 });
 
-app.factory('connection', function($base64,$http,$q) {
-    var prConfig = null;
+app.service('bitbucketCloudService', function($base64,$http,$q) {
 
-    var loadJSONData = function(path) {
-      if(!sessionStorage.authVal) {
+    this.loadJSONData = function(path,connectionParams) {
+      if(!connectionParams.authVal) {
         return $q.reject( "Connection Parameter sind nicht gesetzt.");;
       }
       return $http({
@@ -59,8 +58,8 @@ app.factory('connection', function($base64,$http,$q) {
           // bitbucket server
           // url: "https://api.bitbucket.org/1.0/projects",
           // bitbucket cloud
-          url: "https://api.bitbucket.org/2.0/repositories/" + sessionStorage.user + "/" + sessionStorage.repo + "/src/master/" + path,
-          headers: { "Content-Type": "application/json", "Authorization": sessionStorage.authVal }
+          url: "https://api.bitbucket.org/2.0/repositories/" + connectionParams.user + "/" + connectionParams.repo + "/src/master/" + path,
+          headers: { "Content-Type": "application/json", "Authorization": connectionParams.authVal }
       })
       .catch( function(response) {
         return $q.reject( "Http error " + response.status + (response.data!=""? " ("+response.data+")" : ""));
@@ -71,9 +70,9 @@ app.factory('connection', function($base64,$http,$q) {
       });
     };
 
-    var saveJSONData = function(path,data,msg) {
-      if(!sessionStorage.authVal) {
-        return $q.reject( "Connection Parameter sind nicht gesetzt.");;
+    this.saveJSONData = function(path,data,msg,connectionParams) {
+      if(!connectionParams.authVal) {
+        return $q.reject( "Connection Parameter sind nicht gesetzt.");
       }
       // prepare http data
       var postData = new FormData();
@@ -85,52 +84,67 @@ app.factory('connection', function($base64,$http,$q) {
         // bitbucket server
         // url: "https://api.bitbucket.org/1.0/projects",
         // bitbucket cloud
-        url: "https://api.bitbucket.org/2.0/repositories/" + sessionStorage.user + "/" + sessionStorage.repo + "/src",
+        url: "https://api.bitbucket.org/2.0/repositories/" + connectionParams.user + "/" + connectionParams.repo + "/src",
         data: postData,
-        headers: { "Content-Type": undefined, "Authorization": sessionStorage.authVal }})
+        headers: { "Content-Type": undefined, "Authorization": connectionParams.authVal }})
       .catch( function(response) {
         return $q.reject( "Http error " + response.status + (response.data!=""? " ("+response.data+")" : ""));
       });
     };
 
-    var connectionService = {};
-    connectionService.setParams = function(p_user,p_repo,p_dataPath,p_password) {
-      // save to session
-      sessionStorage.user = p_user;
-      sessionStorage.repo = p_repo;
-      sessionStorage.dataPath = p_dataPath;
-      if (!p_dataPath.match(/\.json+$/)) console.error( "Data path muss Extension .json haben.");
-      sessionStorage.configPath = p_dataPath.replace(/\.json+$/, ".config.json"); // replace extension .json -> .config.json
-      sessionStorage.authVal = "Basic " + $base64.encode( p_user + ":" + p_password );
-    }
-    connectionService.loadConfig = function() {
-      // buffer the promise as it is used multiple times...
-      return prConfig || (prConfig = loadJSONData( sessionStorage.configPath ));
-    };
-    connectionService.loadData = function() { return loadJSONData( sessionStorage.dataPath ); };
-    connectionService.saveData = function(data, msg) { return saveJSONData( sessionStorage.dataPath, data, msg ); };
-    connectionService.logout = function() { sessionStorage.removeItem("authVal"); }
-    connectionService.getUser = function() { return sessionStorage.user; }
-    connectionService.getRepo = function() { return sessionStorage.repo; }
-    connectionService.getDataPath = function() { return sessionStorage.dataPath; }
-
-    return connectionService;
 });
 
-app.controller('LoginCtrl', function($scope, $location, connection) {
-  $scope.user = getSearchParam("user") || connection.getUser();
-  $scope.repo = getSearchParam("repo") || connection.getRepo();
-  $scope.path = getSearchParam("path") || connection.getDataPath();
+app.factory('connectionFactory', function($base64,$http,$q,bitbucketCloudService) {
+    var prConfig = null; // Promise
+
+    var providerList = { "bitbucketCloud": bitbucketCloudService, "bitbucketServer": "..." };
+    function getProvider() {
+      return providerList[sessionStorage.provider];
+    };
+
+    return {
+      listProviders: function() { return providerList; },
+      setParams: function(p_provider,p_user,p_repo,p_dataPath,p_password) {
+        // save to session
+        if (!providerList[p_provider]) console.error( "Provider " + p_provider + " unbekannt");
+        sessionStorage.provider = p_provider;
+        sessionStorage.user = p_user;
+        sessionStorage.repo = p_repo;
+        sessionStorage.dataPath = p_dataPath;
+        if (!p_dataPath.match(/\.json+$/)) console.error( "Data path muss Extension .json haben.");
+        sessionStorage.configPath = p_dataPath.replace(/\.json+$/, ".config.json"); // replace extension .json -> .config.json
+        sessionStorage.authVal = "Basic " + $base64.encode( p_user + ":" + p_password );
+      },
+      loadConfig: function() {
+        // buffer the promise as it is used multiple times...
+        return this.prConfig || (this.prConfig = getProvider().loadJSONData( sessionStorage.configPath, sessionStorage ));
+      },
+      loadData: function() { return getProvider().loadJSONData( sessionStorage.dataPath, sessionStorage ); },
+      saveData: function(data, msg) { return getProvider().saveJSONData( sessionStorage.dataPath, data, msg, sessionStorage ); },
+      logout: function() { sessionStorage.removeItem("authVal"); },
+      getProvider: function() { return sessionStorage.provider; },
+      getUser: function() { return sessionStorage.user; },
+      getRepo: function() { return sessionStorage.repo; },
+      getDataPath: function() { return sessionStorage.dataPath; }
+    }
+});
+
+app.controller('LoginCtrl', function($scope, $location, connectionFactory) {
+  $scope.providerList = connectionFactory.listProviders();
+  $scope.provider = getSearchParam("provider") || connectionFactory.getProvider() || Object.keys($scope.providerList)[0];
+  $scope.user = getSearchParam("user") || connectionFactory.getUser();
+  $scope.repo = getSearchParam("repo") || connectionFactory.getRepo();
+  $scope.path = getSearchParam("path") || connectionFactory.getDataPath();
   $scope.formSubmit = function() {
     // get config
-    connection.setParams( $scope.user, $scope.repo, $scope.path, $scope.password );
-    connection.loadConfig()
+    connectionFactory.setParams( $scope.provider, $scope.user, $scope.repo, $scope.path, $scope.password );
+    connectionFactory.loadConfig()
     .then( function(config) { $location.path("/refedit"); })
     .catch( function(error) { $scope.error = error; });
   };
 });
 
-app.controller('RefEditCtrl', function($scope, $timeout, $location, connection, DTOptionsBuilder, DTColumnBuilder) {
+app.controller('RefEditCtrl', function($scope, $timeout, $location, connectionFactory, DTOptionsBuilder, DTColumnBuilder) {
   // init vars
   $scope.angular = angular;
   $scope.config = {};
@@ -143,8 +157,8 @@ app.controller('RefEditCtrl', function($scope, $timeout, $location, connection, 
   $scope.formSchema = {};
   $scope.formStyle = {};
   $scope.toggles = {};
-  $scope.tableName = "Referenzdaten";
-  $scope.formName = "Editieren";
+  $scope.tableName = "Referenzdaten"; // default name can be overriden by config.tableName
+  $scope.formName = "Editieren"; // default name can be overriden by config.formName
 
   $scope.toggle = function( v ) {
     console.log( "toggling "+v );
@@ -159,7 +173,7 @@ app.controller('RefEditCtrl', function($scope, $timeout, $location, connection, 
 
   // init table
   $scope.tableOptions = DTOptionsBuilder
-    .fromFnPromise( connection.loadData())
+    .fromFnPromise( connectionFactory.loadData())
     .withBootstrap()
     .withPaginationType('numbers')
     .withOption('scrollX', '100%')
@@ -192,7 +206,7 @@ app.controller('RefEditCtrl', function($scope, $timeout, $location, connection, 
   };
   function adjustTableSize() { $scope.tableInstance.DataTable.columns.adjust().draw(); };
   // set table cols and title from config promise
-  $scope.tableCols = connection.loadConfig().then( function(config) {
+  $scope.tableCols = connectionFactory.loadConfig().then( function(config) {
     if (config.tableName) $scope.tableName = config.tableName;
     return config.tableCols.map( function(v) { return DTColumnBuilder.newColumn(v).withTitle(v); });
   });
@@ -232,7 +246,7 @@ app.controller('RefEditCtrl', function($scope, $timeout, $location, connection, 
   }
 
   // load config from promise
-  $scope.config = connection.loadConfig().then( function(config) {
+  $scope.config = connectionFactory.loadConfig().then( function(config) {
     console.log("Form configuration", config);
     // set form config
     if (config.height) $scope.formStyle['min-height'] = config.height;
@@ -273,7 +287,7 @@ app.controller('RefEditCtrl', function($scope, $timeout, $location, connection, 
     if ($scope.formDirty) {
       alert( "Formulardaten sind noch nicht übernommen!");
     } else {
-      connection.saveData($scope.tableInstance.DataTable.data().toArray(), "testing")
+      connectionFactory.saveData($scope.tableInstance.DataTable.data().toArray(), "testing")
       .then(function(data) {
         console.log("saved to storage");
         $scope.dataDirty = false;
@@ -286,7 +300,7 @@ app.controller('RefEditCtrl', function($scope, $timeout, $location, connection, 
 
   // get back to login page
   $scope.logout = function() {
-    connection.logout();
+    connectionFactory.logout();
     $location.path("/");
   };
 
