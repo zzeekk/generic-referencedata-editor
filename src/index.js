@@ -4,7 +4,30 @@
 // TODO: Umstellen auf bitbucket-server
 // TODO: packetize for release
 
-var app = angular.module('jsonedit', ['schemaForm','base64','ngRoute','datatables','datatables.bootstrap']);
+// css
+import '../node_modules/bootstrap3/dist/css/bootstrap.min.css';
+import '../node_modules/bootstrap3/dist/css/bootstrap-theme.min.css';
+import '../node_modules/bootstrap-vertical-tabs/bootstrap.vertical-tabs.min.css';
+import '../node_modules/angular-datatables/dist/css/angular-datatables.min.css';
+import '../node_modules/angular-datatables/dist/plugins/bootstrap/datatables.bootstrap.min.css';
+import './index.css';
+
+// scripts
+import datatables from 'datatables.net';
+import angular from 'angular';
+import 'angular-sanitize';
+import 'angular-route';
+import 'angular-base64';
+import 'angular-ui-bootstrap';
+import 'angular-datatables';
+import '../node_modules/angular-datatables/dist/plugins/bootstrap/angular-datatables.bootstrap.min.js';
+//the following bug isn't yet fixed on master: https://github.com/json-schema-form/angular-schema-form/pull/672/commits/e78ecc890d329aa824ffc86cb894a1f7a4cec124
+//we now use develop version with bootstrap extensions for collapsible fieldset/tabarray @ https://github.com/zzeekk/angular-schema-form-bootstrap.git#develop
+//the file angular-schema-form-bootstrap-bundled.min.js as angular-schema-form bundled
+import schemaForm from '../node_modules/angular-schema-form-bootstrap/dist/angular-schema-form-bootstrap-bundled.js';
+
+var dt = datatables( window, $ ) // initialize datatables (must be done before angular-datatables)
+var app = angular.module('refedit', ['schemaForm','base64','ngRoute','datatables','datatables.bootstrap']);
 
 function getSearchParam( param ) {
   var res = window.location.search.match( '(\\?|&)' + param + '=([^&]*)');
@@ -14,12 +37,12 @@ function getSearchParam( param ) {
 
 app.config(function($routeProvider) {
   $routeProvider
-    .when("/jsonedit", {
-        templateUrl : "template/jsonedit.html",
-        controller : "AppCtrl"
+    .when("/refedit", {
+        template : require("./refedit.html"),
+        controller : "RefEditCtrl"
     })
     .otherwise({
-        templateUrl : "template/login.html",
+        template : require("./login.html"),
         controller : "LoginCtrl"
     });
 });
@@ -27,7 +50,7 @@ app.config(function($routeProvider) {
 app.factory('connection', function($base64,$http,$q) {
     var prConfig = null;
 
-    loadJSONData = function(path) {
+    var loadJSONData = function(path) {
       if(!sessionStorage.authVal) {
         return $q.reject( "Connection Parameter sind nicht gesetzt.");;
       }
@@ -48,7 +71,7 @@ app.factory('connection', function($base64,$http,$q) {
       });
     };
 
-    saveJSONData = function(path,data,msg) {
+    var saveJSONData = function(path,data,msg) {
       if(!sessionStorage.authVal) {
         return $q.reject( "Connection Parameter sind nicht gesetzt.");;
       }
@@ -102,12 +125,12 @@ app.controller('LoginCtrl', function($scope, $location, connection) {
     // get config
     connection.setParams( $scope.user, $scope.repo, $scope.path, $scope.password );
     connection.loadConfig()
-    .then( function(config) { $location.path("/jsonedit"); })
+    .then( function(config) { $location.path("/refedit"); })
     .catch( function(error) { $scope.error = error; });
   };
 });
 
-app.controller('AppCtrl', function($scope, $timeout, $location, connection, DTOptionsBuilder, DTColumnBuilder) {
+app.controller('RefEditCtrl', function($scope, $timeout, $location, connection, DTOptionsBuilder, DTColumnBuilder) {
   // init vars
   $scope.angular = angular;
   $scope.config = {};
