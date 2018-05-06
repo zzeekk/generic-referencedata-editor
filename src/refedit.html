@@ -1,7 +1,7 @@
 <div class="container-fluid">
   <div class="row" style="margin-bottom:10px">
     <div ng-class="{'col-md-12': !selectedRow, 'col-md-6': selectedRow}">
-      <h3>Fahrzeugstammdaten
+      <h3>{{tableName}}
         <button class="btn btn-primary pull-right"
                 type="submit" ng-click="logout()">Logout</button>
         <button class="btn btn-primary btn-success pull-right" ng-show="dataDirty" style="margin-right:10px;"
@@ -10,7 +10,7 @@
       <table datatable="" dt-options="tableOptions" dt-columns="tableCols" dt-instance="tableInstance" class="table table-hover"></table>
     </div>
     <div ng-show="selectedRow" class="col-md-6" ng-style="formStyle">
-      <h3>Fahrzeug editieren
+      <h3>{{formName}}
         <button class="btn btn-primary pull-right" ng-class="{'btn-danger': ngform.$invalid, 'btn-success': ngform.$valid}"
                 type="submit" ng-show="editObjDirty" ng-click="updateObj(ngform)">Aktualisieren</button>
       </h3>

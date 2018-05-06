@@ -143,6 +143,8 @@ app.controller('RefEditCtrl', function($scope, $timeout, $location, connection, 
   $scope.formSchema = {};
   $scope.formStyle = {};
   $scope.toggles = {};
+  $scope.tableName = "Referenzdaten";
+  $scope.formName = "Editieren";
 
   $scope.toggle = function( v ) {
     console.log( "toggling "+v );
@@ -189,8 +191,9 @@ app.controller('RefEditCtrl', function($scope, $timeout, $location, connection, 
     return row;
   };
   function adjustTableSize() { $scope.tableInstance.DataTable.columns.adjust().draw(); };
-  // set table cols from config promise
+  // set table cols and title from config promise
   $scope.tableCols = connection.loadConfig().then( function(config) {
+    if (config.tableName) $scope.tableName = config.tableName;
     return config.tableCols.map( function(v) { return DTColumnBuilder.newColumn(v).withTitle(v); });
   });
   $scope.tableInstance = {};
@@ -233,6 +236,7 @@ app.controller('RefEditCtrl', function($scope, $timeout, $location, connection, 
     console.log("Form configuration", config);
     // set form config
     if (config.height) $scope.formStyle['min-height'] = config.height;
+    if (config.formName) $scope.formName = config.formName;
     $scope.formSchema = config.schema;
     // extract form definition from schema
     var formDefAuto = extractFormDef( config.schema.properties, "" );
