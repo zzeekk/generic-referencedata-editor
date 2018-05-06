@@ -36,11 +36,11 @@ var app = angular.module('refedit', ['schemaForm','base64','ngRoute','datatables
 app.config(function($routeProvider) {
   $routeProvider
     .when("/refedit", {
-        template : require("./refedit.html"),
+        template : require("./RefEditCtrl.html"),
         controller : "RefEditCtrl"
     })
     .otherwise({
-        template : require("./login.html"),
+        template : require("./LoginCtrl.html"),
         controller : "LoginCtrl"
     });
 });
