@@ -11,6 +11,7 @@ module.exports = {
   },
   module: {
     rules: [
+      { test: /\.js/, loader: 'imports-loader?define=>false'},
       { test: /\.css$/, use: ['style-loader', 'css-loader']},
       { test: /\.html$/, loader: 'html-loader' },
       { test: /\.(png|svg|jpg|gif)$/, loader: 'file-loader'},
