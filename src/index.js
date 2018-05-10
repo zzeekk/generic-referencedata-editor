@@ -1,7 +1,7 @@
 
 // TODO: Popup für Commit message
 // TODO: Fehleranzeige in statusbar popup (Toast)?
-// TODO: Umstellen auf bitbucket-server
+// TODO: neuer Eintrag hinzufügen
 // TODO: packetize for release
 
 // css
