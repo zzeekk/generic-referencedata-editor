@@ -1,0 +1,14 @@
+<div class="modal-header">
+  <h4 class="modal-title">Enter commit message</h4>
+</div>
+<div class="modal-body">
+  <form name="commitDialog" ng-submit="formSubmit()" class="form">
+    <div class="form-group input-group-lg">
+      <input type="text" class="form-control" ng-model="msg" placeholder="message" ng-keyup="hitEnter($event)" required=""/>
+	</div>
+  </form>
+</div>
+<div class="modal-footer">
+  <button type="button" class="btn btn-default" ng-click="cancel()">Cancel</button>
+  <button type="button" class="btn btn-primary" ng-click="save()" ng-disabled="(commitDialog.$dirty && commitDialog.$invalid) || commitDialog.$pristine">Save</button>
+</div>

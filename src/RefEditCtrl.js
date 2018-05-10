@@ -1,8 +1,9 @@
 import './ConnectionFactory.js';
+import './CommitDialogCtrl.js';
 
-var module = angular.module('RefEditCtrl', ['ConnectionFactory']);
+var module = angular.module('RefEditCtrl', ['ConnectionFactory','ui.bootstrap','CommitDialogCtrl']);
 
-module.controller('RefEditCtrl', function($scope, $timeout, $location, ConnectionFactory, DTOptionsBuilder, DTColumnBuilder) {
+module.controller('RefEditCtrl', function($scope, $timeout, $location, $uibModal, ConnectionFactory, DTOptionsBuilder, DTColumnBuilder) {
   // init vars
   $scope.angular = angular;
   $scope.config = {};
@@ -145,13 +146,17 @@ module.controller('RefEditCtrl', function($scope, $timeout, $location, Connectio
     if ($scope.formDirty) {
       alert( "Formulardaten sind noch nicht übernommen!");
     } else {
-      ConnectionFactory.saveData($scope.tableInstance.DataTable.data().toArray(), "testing")
-      .then(function(data) {
-        console.log("saved to storage");
-        $scope.dataDirty = false;
-      })
-      .catch(function(error) {
-        alert("Failed to save to storage: " + error);
+	  // show dialog for commit msg
+	  var dlg = $uibModal.open({ animation: false, backdrop: 'static', template: require('./CommitDialogCtrl.html'), controller: 'CommitDialogCtrl'})
+	  dlg.result.then(function(msg){
+        ConnectionFactory.saveData($scope.tableInstance.DataTable.data().toArray(), msg)
+        .then(function(data) {
+          console.log("saved to storage");
+          $scope.dataDirty = false;
+        })
+        .catch(function(error) {
+          alert("Failed to save to storage: " + error);
+        });
       });
     };
   };
