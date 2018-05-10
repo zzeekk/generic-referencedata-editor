@@ -1,11 +1,12 @@
 import './BitbucketCloudService.js';
+import './BitbucketServerService.js';
 
-var module = angular.module('ConnectionFactory', ['BitbucketCloudService']);
+var module = angular.module('ConnectionFactory', ['BitbucketCloudService', 'BitbucketServerService']);
 
-module.factory('ConnectionFactory', function($base64,$http,$q,BitbucketCloudService) {
+module.factory('ConnectionFactory', function($base64,$http,$q,BitbucketCloudService,BitbucketServerService) {
     var prConfig = null; // Promise
 
-    var providerList = { "bitbucketCloud": BitbucketCloudService, "bitbucketServer": "..." };
+    var providerList = { "BitbucketServer": BitbucketServerService, "BitbucketCloud": BitbucketCloudService };
     function getProvider() {
       return providerList[sessionStorage.provider];
     };
