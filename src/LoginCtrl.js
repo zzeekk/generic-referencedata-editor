@@ -20,7 +20,7 @@ module.controller('LoginCtrl', function($scope, $location, ConnectionFactory) {
   $scope.formSubmit = function() {
     // get config
     ConnectionFactory.setParams( $scope.provider, $scope.user, $scope.project, $scope.repo, $scope.branch, $scope.path, $scope.password );
-    ConnectionFactory.loadConfig()
+    ConnectionFactory.loadConfig( true )
     .then( function(config) { $location.path("/refedit"); })
     .catch( function(error) { $scope.error = error; });
   };

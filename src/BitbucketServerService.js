@@ -23,7 +23,7 @@ module.service('BitbucketServerService', function($http,$q) {
           headers: { "Content-Type": "application/json", "Authorization": connectionParams.authVal }
       })
 	  .then( function(response) {
-		var lastCommitId = response.data.values[0].id;
+		var lastCommitId = (response.data.values.size>0 ? response.data.values[0].id : null);
 		return lastCommitId;
 	  })		  
 	}

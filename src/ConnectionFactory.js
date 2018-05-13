@@ -26,9 +26,9 @@ module.factory('ConnectionFactory', function($base64,$http,$q,BitbucketCloudServ
         sessionStorage.configPath = p_dataPath.replace(/\.json+$/, ".config.json"); // replace extension .json -> .config.json
         sessionStorage.authVal = "Basic " + $base64.encode( p_user + ":" + p_password );
       },
-      loadConfig: function() {
+      loadConfig: function(renew) {
         // buffer the promise as it is used multiple times...
-        return this.prConfig || (this.prConfig = getProvider().loadJSONData( sessionStorage.configPath, sessionStorage ));
+        return (renew ? null : this.prConfig) || (this.prConfig = getProvider().loadJSONData( sessionStorage.configPath, sessionStorage ));
       },
       loadData: function() { return getProvider().loadJSONData( sessionStorage.dataPath, sessionStorage ); },
       saveData: function(data, msg) { return getProvider().saveJSONData( sessionStorage.dataPath, data, msg, sessionStorage ); },
