@@ -12,8 +12,8 @@
   "license": "",
   "scripts": {
     "build": "webpack",
-    "server": "webpack-dev-server --inline --progress",
-    "start": "npm run server"
+    "dev": "webpack-dev-server --inline --progress",
+    "start": "node serve.js"
   },
   "dependencies": {
     "angular": "^1.6.10",
@@ -24,13 +24,14 @@
     "angular-ui-bootstrap": "^2.5.6",
     "bootstrap-vertical-tabs": "^1.2.2",
     "bootstrap3": "^3.3.5",
+    "express": "^4.16.3",
+    "html-webpack-plugin": "^3.2.0",
     "jquery": "^3.3.1"
   },
   "devDependencies": {
     "css-loader": "^0.28.11",
     "file-loader": "^1.1.11",
     "html-loader": "^0.5.5",
-    "html-webpack-plugin": "^3.2.0",
     "imports-loader": "^0.8.0",
     "style-loader": "^0.21.0",
     "webpack": "^4.7.0",
