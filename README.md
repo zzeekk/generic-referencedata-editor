@@ -35,6 +35,7 @@ Nodejs is installed and available on the command line.
 ## Built With
 * [angularjs](https://angularjs.org/) - web framework
 * [angular-schema-form](https://github.com/json-schema-form/angular-schema-form) - angularjs component to create forms from json schema definition
+* [angular-datatables](http://l-lin.github.io/angular-datatables/archives/#!/welcome) - angularjs component to create tables
 * [webpack](https://webpack.js.org) - bundle scripts
 
 ## License
