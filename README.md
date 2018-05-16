@@ -23,9 +23,10 @@ Nodejs is installed and available on the command line.
 #### Without cross-site scripting (Bitbucket Server & Cloud)
 * Install node dependencies: npm install
 * adapt config.json if needed
-  port to use
-  Bitbucket server Url
-  ssl certificate: if you have no certificate for the server, you can create self-signed certificate for testing with the following steps  
+  port to use  
+  Bitbucket server Url  
+  ssl certificate:  
+  if you have no certificate for the server, you can create self-signed certificate for testing with the following steps  
     openssl genrsa -out server.key 2048  
     openssl req -new -key server.key -out server.crt.req  
     openssl x509 -req -in server.crt.req -signkey server.key -out server.crt  
