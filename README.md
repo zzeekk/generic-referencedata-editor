@@ -22,7 +22,7 @@ Nodejs is installed and available on the command line.
 
 #### Without cross-site scripting (Bitbucket Server & Cloud)
 * Install node dependencies: npm install
-* adapt config.json if needed
+* adapt config.json if needed  
   port to use  
   Bitbucket server Url  
   ssl certificate:  
