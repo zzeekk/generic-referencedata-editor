@@ -1,4 +1,6 @@
 {
-  "port": 8080,
-  "bitbucketServerUrl": "https://bitbucket.server"
+  "port": 8079,
+  "bitbucketServerUrl": "https://code.sbb.ch",
+  "sslKeyFile": "server.key",
+  "sslCertFile": "server.crt"
 }

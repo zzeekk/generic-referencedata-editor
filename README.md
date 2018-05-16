@@ -12,6 +12,10 @@ Nodejs is installed and available on the command line.
 
 * Install node dependencies: npm install
 * adapt config.json if needed
+** configure ssl certificate for https or create self-signed certificate for testing with the following steps
+*** openssl genrsa -out server.key 2048
+*** openssl req -new -key server.key -out server.crt.req
+*** openssl x509 -req -in server.crt.req -signkey server.key -out server.crt
 * Run Server: npm start
 
 ## Built With
