@@ -22,6 +22,7 @@
     "angular-route": "^1.6.9",
     "angular-schema-form-bootstrap": "git+https://github.com/zzeekk/angular-schema-form-bootstrap.git#develop",
     "angular-ui-bootstrap": "^2.5.6",
+    "babel-polyfill": "^6.26.0",
     "bootstrap-vertical-tabs": "^1.2.2",
     "bootstrap3": "^3.3.5",
     "express": "^4.16.3",
@@ -29,6 +30,9 @@
     "jquery": "^3.3.1"
   },
   "devDependencies": {
+    "babel-core": "^6.26.3",
+    "babel-loader": "^7.1.4",
+    "babel-preset-env": "^1.7.0",
     "css-loader": "^0.28.11",
     "file-loader": "^1.1.11",
     "html-loader": "^0.5.5",
