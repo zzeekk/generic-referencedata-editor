@@ -32,6 +32,7 @@ module.factory('ConnectionFactory', function($base64,$http,$q,BitbucketCloudServ
       },
       loadData: function() { return getProvider().loadJSONData( sessionStorage.dataPath, sessionStorage ); },
       saveData: function(data, msg) { return getProvider().saveJSONData( sessionStorage.dataPath, data, msg, sessionStorage ); },
+			isLoggedIn: function() { return "authVal" in sessionStorage; },
       logout: function() { sessionStorage.removeItem("authVal"); },
       getProvider: function() { return sessionStorage.provider; },
       getUser: function() { return sessionStorage.user; },
