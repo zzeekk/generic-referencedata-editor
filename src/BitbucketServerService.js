@@ -23,7 +23,7 @@ module.service('BitbucketServerService', function($http,$q) {
           headers: { "Content-Type": "application/json", "Authorization": connectionParams.authVal }
       })
 	  .then( function(response) {
-		var lastCommitId = (response.data.values.size>0 ? response.data.values[0].id : null);
+		var lastCommitId = (response.data.values.length>0 ? response.data.values[0].id : null);
 		return lastCommitId;
 	  })		  
 	}
@@ -67,7 +67,7 @@ module.service('BitbucketServerService', function($http,$q) {
       formData.append("content", JSON.stringify(data,undefined,2));
       formData.append("message", msg);
       formData.append("branch", connectionParams.branch);
-	  formData.append("sourceCommitId", sourceCommitIds[path] );
+			formData.append("sourceCommitId", sourceCommitIds[path] );
       return $http( {
         method: "PUT",
         url: getApiRepoUrl(connectionParams)+"/browse/"+path,
