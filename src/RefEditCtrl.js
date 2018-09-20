@@ -75,7 +75,7 @@ module.controller('RefEditCtrl', function($scope, $timeout, $location, $uibModal
 	// set table cols and title from config promise
 	$scope.tableCols = ConnectionFactory.loadConfig().then( function(config) {
 		if (config.tableName) $scope.tableName = config.tableName;
-		return config.tableCols.map( function(v) { return DTColumnBuilder.newColumn(v).withTitle(v); });
+		return config.tableCols.map( function(v) { return DTColumnBuilder.newColumn(v).withTitle(v).withOption('defaultContent', '')});
 	});
 	$scope.tableInstance = {};
 
