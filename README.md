@@ -38,5 +38,9 @@ Nodejs is installed and available on the command line.
 * [angular-datatables](http://l-lin.github.io/angular-datatables/archives/#!/welcome) - angularjs component to create tables
 * [webpack](https://webpack.js.org) - bundle scripts
 
+## Open Points
+* Add new / clone / delete records
+* Show detailed form validation error message
+
 ## License
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details
