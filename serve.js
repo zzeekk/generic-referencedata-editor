@@ -2,13 +2,13 @@
 var express = require('express');
 var https = require('https');
 var fs = require('fs');
-var proxy = require('http-proxy-middleware');
+var { createProxyMiddleware } = require('http-proxy-middleware');
 var config = require('./config.json');
 
 /**
  * Configure proxy middleware
  */
-var bitbucketServerProxy = proxy({
+var bitbucketServerProxy = createProxyMiddleware({
   target: config.bitbucketServerUrl,
   pathRewrite: {'^/bitbucketServerProxy' : ''},
   changeOrigin: true	
