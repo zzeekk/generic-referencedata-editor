@@ -1,13 +1,16 @@
 # Generic reference data editor
 
-Webapplication using a generic form definition to edit a list of complex elements in json format on git provider.
+Webapplication using a Json Schema definition to edit a list of complex elements in Json format using different backend providers.
 The GUI shows a list of the elements as table, and an edit form if an element is selected.
 
-The configuration to edit a specified sample.json file is named sample.config.json. It sets the titles, columns to display in the table and the json schema for the elements to be edited. The json schema is used to create a generic form for editing the elements. https://jsonschema.net/ can create json schema's by example (disable all assertions and annotations).
+The Json Schema to edit a specified sample.json file is named sample.schema.json. It sets the titles, The Json Schema is used to create a generic form for editing the elements. https://jsonschema.net/ can create json schema's by example (disable all assertions and annotations).
 
-The API of the git provider is used as backend service. Supported git providers are currently:
-* Bitbucket Cloud
-* Bitbucket Server: as internal servers normally dont allow cross-site scripting, a https server must started which is configured to forward the api request. See below for configuration.
+Supported backend providers are currently:
+* BitbucketCloud
+* BitbucketServer: as internal servers normally dont allow cross-site scripting, a https server be must started which is configured to forward the api request. See below for configuration.
+* Upload: upload a local Json Schema and Json file, and download the edited Json file again.
+
+TODO: additional configurations ($metadata)
 
 ## Getting Started
 
@@ -21,22 +24,21 @@ Nodejs is installed and available on the command line.
 * open "dist/index.html" in browser
 
 #### Without cross-site scripting (Bitbucket Server & Cloud)
-* Install node dependencies: npm install
-* adapt config.json if needed  
-  port to use  
-  Bitbucket server Url  
-  ssl certificate:  
-  if you have no certificate for the server, you can create self-signed certificate for testing with the following steps  
-    openssl genrsa -out server.key 2048  
-    openssl req -new -key server.key -out server.crt.req  
-    openssl x509 -req -in server.crt.req -signkey server.key -out server.crt  
-* Run Server: npm start
+* Install node dependencies: yarn install
+* create config.json with following properties:  
+  - "port": port to use
+  - "bitbucketServerUrl" Bitbucket server Url  
+  - "sslKeyFile" + "sslCertFile": if you have no certificate for the server, you can create self-signed certificate for testing with the following steps:
+    - openssl genrsa -out server.key 2048  
+    - openssl req -new -key server.key -out server.crt.-req  
+    - openssl x509 -req -in server.crt.req -signkey server.key -out server.crt  
+* Run Server: yarn run
 
 ## Built With
-* [angularjs](https://angularjs.org/) - web framework
-* [angular-schema-form](https://github.com/json-schema-form/angular-schema-form) - angularjs component to create forms from json schema definition
-* [angular-datatables](http://l-lin.github.io/angular-datatables/archives/#!/welcome) - angularjs component to create tables
-* [webpack](https://webpack.js.org) - bundle scripts
+* react
+* react-schema-form
+* ka-table
+* vite
 
 ## Open Points
 * Add new / clone / delete records
