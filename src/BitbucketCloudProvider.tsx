@@ -125,7 +125,7 @@ export class BitbucketCloudProvider extends DataProvider {
       postData.append("message", msg);
       postData.append("branch", this.loginInput!.branch!);        
       this.makeRequest("", "POST", postData);
-      this.changed = false; // reset changed flag
+      this.changedRecords = []; // reset changed records
     });
   };
 }

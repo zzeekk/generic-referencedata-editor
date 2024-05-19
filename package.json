@@ -6,6 +6,7 @@
     "type": "git",
     "url": "https://github.com/zzeekk/generic-referencedata-editor.git"
   },
+  "type": "module",
   "dependencies": {
     "@emotion/react": "^11.10.6",
     "@emotion/styled": "^11.10.6",

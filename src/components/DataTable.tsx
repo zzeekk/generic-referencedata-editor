@@ -1,13 +1,12 @@
 import { Box, CircularProgress } from "@mui/material";
 import { DataType, Table, useTable } from 'ka-table';
-import { SortingMode, SortDirection, FilteringMode } from 'ka-table/enums';
+import { FilteringMode, SortDirection, SortingMode } from 'ka-table/enums';
 import { Column } from 'ka-table/models';
 import { useContext, useMemo, useState } from "react";
-import { useNavigate } from "react-router-dom";
 
 import "ka-table/style.css";
-import { getPropertyByPath, onlyUnique } from "../util/helpers";
 import { RouterContext } from "../App";
+import { getPropertyByPath, onlyUnique } from "../util/helpers";
 
 export function nestedPropertyRenderer(defaultValue: string = "", paddingRight: string = '0') {
   return (prop: any) => {
@@ -16,13 +15,11 @@ export function nestedPropertyRenderer(defaultValue: string = "", paddingRight: 
   }
 }
 
-export default function DataTable(props: { data: any[], columns: any[], keyAttr: string, treeGroupKeyAttr?: string, navigator?: (any) => string, searchText?: string }) {
+export default function DataTable(props: { data: any[], columns: any[], keyAttr: string, treeGroupKeyAttr?: string, navigator?: (any) => string, searchText?: string, selectedRows?: any[] }) {
 
-  const { data, columns, keyAttr, treeGroupKeyAttr, navigator } = props;
+  const { data, columns, keyAttr, treeGroupKeyAttr, navigator, selectedRows } = props;
   const [loading, setLoading] = useState(true)
   const router = useContext(RouterContext)!;
-  //const navigate = useNavigate();
-  //const navigateRel = (subPath: string) => navigate(subPath, {relative: 'path'}); // this navigates Relative to path, not route
   const dataTable = useTable();
 
   if (columns && data && data.length > 0 && loading) setLoading(false);
@@ -108,23 +105,24 @@ export default function DataTable(props: { data: any[], columns: any[], keyAttr:
       <Table
         table={dataTable}
         rowKeyField={keyAttr}
+        selectedRows={selectedRows}
         treeGroupKeyField={treeGroupKeyAttr}
         treeGroupsExpanded={[]}
         data={data}
         columns={tableColumns}
         columnResizing={true}
         sortingMode={SortingMode.Single}
-        virtualScrolling={{
-          enabled: true
-        }}
+        virtualScrolling={{enabled: true}}
         childComponents={{
           dataRow: {
-            elementAttributes: () => ({
+            elementAttributes: (row) => {
+              return ({
               onClick: (e, data) => {
                 if (navigator) router.navigate(router, navigator(data.childProps.rowData))
-              }
-            })
-          },
+              },
+              style: {backgroundColor: (row.selectedRows.includes(row.rowData[row.rowKeyField]) ? "#ffcccb" : undefined)}
+            });
+          }},
           cellText: {
             content: (prop) => {
               if (tableColumnsRenderer && tableColumnsRenderer[prop.column.key]) return tableColumnsRenderer[prop.column.key](prop);
@@ -144,7 +142,7 @@ export default function DataTable(props: { data: any[], columns: any[], keyAttr:
           }
         }}
         sort={({ column }) => {
-          if (column.key.endsWith('_at')) {
+          if (column.key.endsWith('_at')) { // special rule for datetime (following naming convention that attributes end with '_at')
             return (a, b) => {
               var result = a === b ? 0
                 : !a ? 1
