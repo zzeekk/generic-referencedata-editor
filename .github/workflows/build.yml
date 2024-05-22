@@ -47,6 +47,7 @@ jobs:
         path: |
           build/assets/*
           build/index.html
+          serve.js
           
     - name: 'If build on master branch, bump version on develop'
       if: ${{ github.ref_name == 'master' }}
