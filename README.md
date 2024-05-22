@@ -1,11 +1,11 @@
 # Generic reference data editor
 
-This is web application using a Json Schema definition to edit a list of elements in Json format.
+This is web application using a Json Schema definition to edit a list of records in Json format.
 The schema and data can be loaded using different backend providers.
 The GUI shows a list of the elements as table, and an edit form if an element is selected.
 
 The Json Schema to edit a specified <dataset-name>.json file is named <dataset-name>.schema.json by convention.
-The Json Schema is used to create a generic form for editing the elements.
+The Json Schema is used to create a generic form for editing a record. The form supports arrays and nested objects.
 https://jsonschema.net/ can create json schema's by example (disable all assertions and annotations).
 
 The schma file needs an additional "$metadata" attribute which can take the following properties:
@@ -21,6 +21,9 @@ The backend provider can be selected on startup. Supported backend providers are
 * download latest release zip file: `wget https://github.com/zzeekk/generic-referencedata-editor/releases/latest/download/editor.zip`
 * unzip
 * open "dist/index.html" in browser
+* choose provider and enter informations to access data file in repository, or upload schema and data
+* edit data records
+* commit data to repository or download data using buttons in the upper right of the table view
 
 ### without cross-site scripting (Bitbucket Server & Cloud)
 Start a local https server to forward api request to repository server:
