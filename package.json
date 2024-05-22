@@ -1,47 +1,71 @@
 {
   "name": "generic-referencedata-editor",
-  "version": "0.0.1",
-  "description": "",
+  "version": "1.0.0",
   "private": true,
-  "keywords": [],
   "repository": {
     "type": "git",
     "url": "https://github.com/zzeekk/generic-referencedata-editor.git"
   },
-  "author": "",
-  "license": "",
-  "scripts": {
-    "build": "webpack",
-    "dev": "webpack-dev-server --inline --progress",
-    "start": "node serve.js"
-  },
+  "type": "module",
   "dependencies": {
-    "@babel/core": "^7.20.12",
-    "angular": "^1.6.10",
-    "angular-base64": "^2.0.5",
-    "angular-datatables": "^0.6.2",
-    "angular-route": "^1.6.9",
-    "angular-schema-form-bootstrap": "git+https://github.com/zzeekk/angular-schema-form-bootstrap.git#develop",
-    "angular-ui-bootstrap": "^2.5.6",
-    "babel-polyfill": "^6.26.0",
-    "bootstrap-vertical-tabs": "^1.2.2",
-    "bootstrap3": "^3.3.5",
-    "browserslist": "^4.21.4",
-    "express": "^4.16.3",
-    "html-webpack-plugin": "^5.5.0",
-    "jquery": "^3.3.1"
+    "@emotion/react": "^11.10.6",
+    "@emotion/styled": "^11.10.6",
+    "@mui/icons-material": "^5.8.4",
+    "@mui/material": "^5.15.16",
+    "@rjsf/core": "^5.18.3",
+    "@rjsf/mui": "^5.18.3",
+    "@rjsf/utils": "^5.18.3",
+    "@rjsf/validator-ajv8": "^5.18.3",
+    "@types/jest": "^27.5.2",
+    "@types/node": "^16.11.43",
+    "@types/react": "^18.0.2",
+    "@types/react-dom": "^18.0.6",
+    "@types/react-resizable": "^3.0.4",
+    "@types/react-router-dom": "^5.1.5",
+    "@types/styled-components": "^5.1.9",
+    "@vitejs/plugin-react": "^4.2.0",
+    "antd": "^5.4.7",
+    "assert": "^2.1.0",
+    "ka-table": "^8.2.0",
+    "polished": "^4.3.1",
+    "react": "^18.3.1",
+    "react-custom-scrollbars-2": "^4.4.0",
+    "react-dom": "^18.2.0",
+    "react-hook-form": "^7.51.4",
+    "react-resizable": "^3.0.5",
+    "react-tooltip": "^4.2.17",
+    "typescript": "^4.7.4",
+    "vite": "^5.0.0"
   },
-  "devDependencies": {
-    "babel-core": "^6.26.3",
-    "babel-loader": "^9.1.2",
-    "babel-preset-env": "^1.7.0",
-    "css-loader": "^6.7.1",
-    "file-loader": "^6.2.0",
-    "html-loader": "^0.5.5",
-    "imports-loader": "^0.8.0",
-    "style-loader": "^0.21.0",
-    "webpack": "^5.75.0",
-    "webpack-cli": "^4.9.2",
-    "webpack-dev-server": "^4.9.0"
-  }
+  "devDependencies": {},
+  "scripts": {
+    "start": "vite --force",
+    "build": "vite build",
+    "serve": "vite preview",
+    "lint": "npx eslint src --ext .js,.jsx,.ts,.tsx --max-warnings=0",
+    "run": "node serve.js"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "peerDependencies": {
+    "react": "18.0.2",
+    "react-dom": "18.0.2"
+  },
+  "homepage": "./"
 }

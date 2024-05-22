@@ -24,7 +24,3 @@ var options = {key: privateKey, cert: certificate};
 https.createServer(options, app).listen(config.port);
 
 console.log('listening for https on port '+config.port);
-
-//openssl genrsa -out server.key 2048
-//openssl req -new -key server.key -out server.crt.req
-//openssl x509 -req -in server.crt.req -signkey server.key -out server.crt

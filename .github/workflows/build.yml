@@ -1,0 +1,85 @@
+name: Build
+
+on: 
+  push:
+    branches:
+      - 'master'
+      - 'develop'
+  pull_request:
+    branches:
+      - 'develop'
+    types: [opened, synchronize]      
+
+  # allow for manual builds from feature branches
+  workflow_dispatch:
+
+jobs:
+  build-and-create-release:
+
+    runs-on: ubuntu-latest
+
+    steps:
+
+    - name: Git Checkout
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Setup node
+      uses: actions/setup-node@v4
+      with:
+        node-version: 20
+
+    - name: get-npm-version
+      id: package-version
+      uses: martinbeentjes/npm-get-version-action@main
+
+    - run: yarn install
+    - run: yarn build
+      env:
+        CI: '' # disable CI mode as it makes build fail on warnings
+
+    - name: Upload build to artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: editor
+        path: |
+          build/assets/*
+          build/index.html
+          serve.js
+          
+    - name: 'If build on master branch, bump version on develop'
+      if: ${{ github.ref_name == 'master' }}
+      uses:  phips28/gh-action-bump-version@v9.0.27
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        target-branch: develop
+        skip-tag: true    
+
+    - name: 'If build on master branch, download artifact'
+      if: ${{ github.ref_name == 'master' }}
+      uses: actions/download-artifact@v3
+      with:
+        path: artifact
+        name: editor
+
+    - name: 'If build on master branch, zip release asset'
+      if: ${{ github.ref_name == 'master' }}
+      uses: thedoctor0/zip-release@main
+      with:
+        type: zip
+        directory: artifact
+        filename: editor.zip
+
+    - name: 'If build on master branch, create release'
+      if: ${{ github.ref_name == 'master' }}
+      uses: marvinpinto/action-automatic-releases@latest
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        title: Release-${{ steps.package-version.outputs.current-version}}
+        automatic_release_tag: ${{ steps.package-version.outputs.current-version}}
+        draft: true
+        prerelease: false
+        files: artifact/editor.zip
