@@ -12,7 +12,7 @@ interface LoginInput {
   password: string;
 }
 
-function LoginForm(props: {provider: BitbucketCloudProvider, defaults: LoginInput, login: (LoginInput) => void, setProvider: (DataProvider) => void}) {
+function LoginForm(props: {provider: BitbucketServerProvider, defaults: LoginInput, login: (LoginInput) => void, setProvider: (DataProvider) => void}) {
   const { handleSubmit, register, formState } = useForm<LoginInput>({      
     defaultValues: props.defaults,
   });
@@ -36,10 +36,11 @@ function LoginForm(props: {provider: BitbucketCloudProvider, defaults: LoginInpu
   </>)  
 }
 
-export class BitbucketCloudProvider extends DataProvider {  
+export class BitbucketServerProvider extends DataProvider {  
 
-  // bitbucket cloud
-	private baseUrl = "https://api.bitbucket.org/2.0";
+  // bitbucket server, according to https://docs.atlassian.com/bitbucket-server/rest/5.8.0/bitbucket-rest.html
+  // must use proxy because of CORS
+  private baseUrl = "/bitbucketServerProxy/rest/api/1.0"
 
   // config variables
   private loginInput?: LoginInput;
@@ -48,9 +49,10 @@ export class BitbucketCloudProvider extends DataProvider {
   // cache
   private data?: Promise<[]>;
   private config?: Promise<{}>;
+  private dataCommitId?: Promise<string>;
 
   getName() {
-    return 'BitbucketCloud'
+    return 'BitbucketServer'
   };
 
   private getSchemaPath(): string {
@@ -64,7 +66,7 @@ export class BitbucketCloudProvider extends DataProvider {
 	private makeRequest(path: string = "", method: string = 'GET', body?: any): Promise<any> {
 		// if project isn't specified, user name is taken as project
 		const project = this.loginInput!.project || this.loginInput!.user;
-		const repoUrl = this.baseUrl + "/repositories/" + project + "/" + this.loginInput!.repo + "/src";
+		const repoUrl = this.baseUrl + "/projects/" + project + "/repos/" + this.loginInput!.repo;
     // prepare headers
     const headers = new Headers();
     headers.append("Content-Type", "application/json");
@@ -81,7 +83,7 @@ export class BitbucketCloudProvider extends DataProvider {
     return <LoginForm provider={this} defaults={params as LoginInput} login={x => this.login(this,x)} setProvider={setProvider}/>
   };
 
-  login(that: BitbucketCloudProvider, input: LoginInput) {
+  login(that: BitbucketServerProvider, input: LoginInput) {
     that.loginInput = input;
     that.authVal = "Basic " + btoa( that.loginInput!.user + ":" + that.loginInput!.password );
     // test request
@@ -91,9 +93,10 @@ export class BitbucketCloudProvider extends DataProvider {
   getData() {
     if(!this.loginInput) throw Error( "Connection parameters not set.");
     if(!this.data) {
-      this.data = this.makeRequest("/"+this.loginInput!.branch+"/"+this.loginInput!.path)
+      this.data = this.makeRequest("/raw/"+this.loginInput!.path+"?at="+this.loginInput!.branch)
       .then( response => response.json())
       .then( data => (isArray(data) ? data as []: Promise.reject("getData: response is not a JSon Array")));
+      this.rememberDataCommitId();
     }
     return this.data;
   };
@@ -101,12 +104,21 @@ export class BitbucketCloudProvider extends DataProvider {
   getSchema() {
     if(!this.loginInput) throw Error( "Connection parameters not set.");
     if(!this.config) {
-      this.config = this.makeRequest("/"+this.loginInput!.branch+"/"+this.getSchemaPath())
+      this.config = this.makeRequest("/raw/"+this.getSchemaPath()+"?at="+this.loginInput!.branch)
       .then( response => response.json())
       .then( data => (isObject(data) ? data as {}: Promise.reject("getSchema: response is not a JSon Object")));
     }
     return this.config;
   };
+
+  rememberDataCommitId() {
+    this.dataCommitId = this.makeRequest("/commits?path="+this.loginInput!.path+"&until="+this.loginInput!.branch+"&limit=1")
+    .then( response => response.json())
+    .then( data => {
+      console.log("got data commitId", data);
+      return (data.values.length>0 ? data.values[0].id : null);
+    });
+  }
   
   getDataName() {
     if(!this.loginInput) throw Error( "Connection parameters not set.");
@@ -119,12 +131,18 @@ export class BitbucketCloudProvider extends DataProvider {
 
   saveData(msg: string) {
     if(!this.loginInput) throw Error( "Connection parameters not set.");
-    this.data?.then(d => {
+    Promise.all([this.data, this.dataCommitId]).then(([data,commitId]) => {
       var postData = new FormData();
-      postData.append(this.loginInput!.path!, JSON.stringify(d,undefined,2));
+      postData.append("content", JSON.stringify(data,undefined,2));
       postData.append("message", msg);
-      postData.append("branch", this.loginInput!.branch!);        
-      this.makeRequest("", "POST", postData);
+      postData.append("branch", this.loginInput!.branch!);     
+			postData.append("sourceCommitId", commitId!);
+      this.dataCommitId = this.makeRequest("/browse/"+this.loginInput!.path, "PUT", postData)
+      .then( response => response.json())
+      .then( data => {
+        console.log("new commitId", data);
+        return data.id;
+      });
       this.changedRecords = []; // reset changed records
     });
   };
