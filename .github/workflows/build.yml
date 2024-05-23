@@ -41,7 +41,7 @@ jobs:
         CI: '' # disable CI mode as it makes build fail on warnings
 
     - name: Upload build to artifact
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: editor
         path: |
@@ -60,7 +60,7 @@ jobs:
 
     - name: 'If build on master branch, download artifact'
       if: ${{ github.ref_name == 'master' }}
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         path: artifact
         name: editor
