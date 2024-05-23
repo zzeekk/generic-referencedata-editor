@@ -36,7 +36,10 @@
     "typescript": "^4.7.4",
     "vite": "5"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "express": "^4.19.2",
+    "http-proxy-middleware": "^3.0.0"
+  },
   "scripts": {
     "start": "vite --force",
     "build": "vite build",
@@ -63,8 +66,8 @@
     ]
   },
   "peerDependencies": {
-    "react": "18.0.2",
-    "react-dom": "18.0.2"
+    "react": "18",
+    "react-dom": "18"
   },
   "homepage": "./"
 }

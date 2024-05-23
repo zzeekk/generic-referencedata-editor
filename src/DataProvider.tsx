@@ -3,17 +3,22 @@ import { ReactElement } from "react";
 export const RECORD_ID = "_id";
 
 export abstract class DataProvider {
-    abstract getLoginForm(params: {}, setProvider: (DataProvider) => void): ReactElement;
+    abstract getLoginForm(params: {}, setProvider: (DataProvider) => void, showError: (string) => void): ReactElement;
     abstract getData(): Promise<[]>;
     abstract getSchema(): Promise<any>;
     abstract getName(): string;
-    abstract getDataName(): string;  
-    abstract saveData(msg: string): void;
+    abstract getDataName(): string;
+    abstract saveData(msg: string): Promise<void>;
     abstract canSaveData(): boolean;
-    calcDataId(): void {    
-      this.getSchema().then(schema => {
+    calcDataId(): Promise<void> {
+      return Promise.all([this.getSchema(),this.getData()])
+      .then(([schema,data]) => {
         const idCols: string[] = this.getMetadata(schema, "idCols");
-        this.getData().then(data => data.forEach((e: any,idx) => this.addDataIdProperty(e, idCols.map(c => e[c]).join("-"))));
+        return data.forEach((e: any, idx) => this.addDataIdProperty(e, idCols.map(c => e[c]).join("-")));
+      })
+      .catch(e => {
+        console.log("calcDataId Promise.all", String(e));
+        throw e;
       });
     }
     addDataIdProperty(e: any, id: string) {

@@ -1,5 +1,5 @@
 import UploadFileOutlinedIcon from '@mui/icons-material/UploadFileOutlined';
-import { Alert, Box, Button, styled } from "@mui/material";
+import { Box, Button, styled } from "@mui/material";
 import { useState } from "react";
 import { DataProvider } from "./DataProvider";
 
@@ -37,10 +37,9 @@ function readDataFile(file: File): Promise<[]> {
   return readJsonFile(file);
 }  
 
-function LoginForm(props: {provider: UploadProvider, login: (provider: UploadProvider, schema: {}, data: []) => void, setProvider: (DataProvider) => void}) {  
+function LoginForm(props: {provider: UploadProvider, login: (provider: UploadProvider, schema: {}, data: []) => void, setProvider: (DataProvider) => void, showError: (string) => void}) {  
   const [schema, setSchema] = useState<any>();
   const [data, setData] = useState<[]>();
-  const [error, setError] = useState<string>();
 
   function submit() {
     props.login(props.provider, schema!, data!);
@@ -53,10 +52,9 @@ function LoginForm(props: {provider: UploadProvider, login: (provider: UploadPro
 
   return (<>
     <Box sx={{ mt: 1 }}>
-      <Button component="label" fullWidth color={getUploadColor(schema)} role={undefined} variant="contained" sx={{ mt: 1, mb: 1 }} startIcon={<UploadFileOutlinedIcon/>}>Upload Schema<VisuallyHiddenInput type="file" accept=".json" onChange={e => readSchemaFile(e.target.files![0]).catch(e => setError(String(e))).then(x => setSchema(x!))}/></Button>
-      <Button component="label" fullWidth color={getUploadColor(data)} role={undefined} variant="contained" sx={{ mt: 1, mb: 1 }} startIcon={<UploadFileOutlinedIcon />}>Upload Data<VisuallyHiddenInput type="file" accept=".json" onChange={e => readDataFile(e.target.files![0]).catch(e => setError(String(e))).then(x => setData(x!))}/></Button>
+      <Button component="label" fullWidth color={getUploadColor(schema)} role={undefined} variant="contained" sx={{ mt: 1, mb: 1 }} startIcon={<UploadFileOutlinedIcon/>}>Upload Schema<VisuallyHiddenInput type="file" accept=".json" onChange={e => readSchemaFile(e.target.files![0]).catch(e => props.showError(String(e))).then(x => setSchema(x!))}/></Button>
+      <Button component="label" fullWidth color={getUploadColor(data)} role={undefined} variant="contained" sx={{ mt: 1, mb: 1 }} startIcon={<UploadFileOutlinedIcon />}>Upload Data<VisuallyHiddenInput type="file" accept=".json" onChange={e => readDataFile(e.target.files![0]).catch(e => props.showError(String(e))).then(x => setData(x!))}/></Button>
       <Button type="submit" fullWidth disabled={(data && schema ? false : true)} variant="contained" onClick={submit} sx={{ mt: 3, mb: 2 }}>Start</Button>
-      {error && <Alert severity="error">{error}</Alert>}
     </Box>
   </>)  
 }
@@ -76,8 +74,8 @@ export class UploadProvider extends DataProvider {
     return 'Upload'
   };
 
-  getLoginForm(params: any, setProvider: (DataProvider) => void) {
-    return <LoginForm provider={this} login={this.login} setProvider={setProvider}/>
+  getLoginForm(params: any, setProvider: (DataProvider) => void, showError: (string) => void) {
+    return <LoginForm provider={this} login={this.login} setProvider={setProvider} showError={showError}/>
   };
 
   login(that: UploadProvider, schema: {}, data: []) {    
@@ -103,7 +101,7 @@ export class UploadProvider extends DataProvider {
     return true;
   }
 
-  saveData(msg: string) {
+  saveData(msg: string): Promise<void> {
     throw new Error("saveData not implemented");
   };
 }

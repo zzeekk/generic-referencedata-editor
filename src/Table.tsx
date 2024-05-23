@@ -24,7 +24,7 @@ export default function Table(props: {show: boolean}) {
 
   const [data, setData] = useState<[]>([]);
   useEffect(() => {provider.getData().then(setData)}, []);
-  useEffect(() => console.log(data), [data]);
+  //useEffect(() => console.log(data), [data]); // debug
 
   function commit() {
     showCommitDialog(true);
@@ -33,12 +33,14 @@ export default function Table(props: {show: boolean}) {
   function save(msg?: string) {
     showCommitDialog(false); // also refreshes button state
     // if msg is empty, commit dialog was cancelled
-    console.log("commit data msg="+msg)
-    if (msg) try {
-      provider.saveData(msg);
-      showSnackbar({msg: "Commit successfull", severity: "info"})
-    } catch (e) {
-      showSnackbar({msg: String(e), severity: "error"})
+    if (msg) {
+      new Promise(() => {})
+      .then(() => provider.saveData(msg))
+      .then(() => showSnackbar({msg: "Commit successfull", severity: "info"}))
+      .catch(e => {
+        showSnackbar({msg: String(e), severity: "error"});
+        throw e;
+      })
     }
   }  
 
