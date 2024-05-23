@@ -1,8 +1,8 @@
 # Generic reference data editor
 
-This is web application using a Json Schema definition to edit a list of records in Json format.
+This is a web application using a Json Schema definition to edit a list of Json records.
 The schema and data can be loaded using different backend providers.
-The GUI shows a list of the elements as table, and an edit form if an element is selected.
+The GUI shows a list of the records as table, and an edit form if a record is selected.
 
 The Json Schema to edit a specified <dataset-name>.json file is named <dataset-name>.schema.json by convention.
 The Json Schema is used to create a generic form for editing a record. The form supports arrays and nested objects.
