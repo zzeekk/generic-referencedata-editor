@@ -12,6 +12,12 @@ interface LoginInput {
   password: string;
 }
 
+interface RequestParams {
+  path: string
+  method?: string
+  body?: any
+}
+
 function LoginForm(props: {provider: BitbucketServerProvider, defaults: LoginInput, login: (LoginInput) => Promise<void>, setProvider: (DataProvider) => void, showError: (string) => void}) {
   const { handleSubmit, register, formState } = useForm<LoginInput>({      
     defaultValues: props.defaults,
@@ -19,11 +25,10 @@ function LoginForm(props: {provider: BitbucketServerProvider, defaults: LoginInp
   const { errors } = formState;
 
   function submit(x: LoginInput) {
-    new Promise(() => console.log("start login"))
+    Promise.resolve()
     .then(() => props.login(x))
     .then(() => props.setProvider(props.provider))
     .catch(e => {
-      console.log("submit", String(e));
       props.showError(String(e));
       props.provider.reset();
       throw e;
@@ -75,16 +80,17 @@ export class BitbucketServerProvider extends DataProvider {
     }
   }
 
-	private makeRequest(path: string = "", method: string = 'GET', body?: any): Promise<any> {
+	private makeRequest(request: RequestParams): Promise<any> {
+    const {path, method, body} = request;
 		// if project isn't specified, user name is taken as project
 		const project = this.loginInput!.project || this.loginInput!.user;
 		const repoUrl = this.baseUrl + "/projects/" + project + "/repos/" + this.loginInput!.repo;
+    console.log("makeRequest", repoUrl+path)
     // prepare headers
     const headers = new Headers();
-    headers.append("Content-Type", "application/json");
     headers.append("Authorization", this.authVal!);
     // fetch
-    return fetch(repoUrl+path, {method: method, headers: headers, body: (body ? JSON.stringify(body) : undefined)})
+    return fetch(repoUrl+path, {method: method, headers: headers, body: body})
     .then( response => {
       if (response.ok) return response;
       else throw Error( "Http error: " + response.status + " " + response.statusText + " (" + method + " "+repoUrl+path +")");
@@ -96,6 +102,7 @@ export class BitbucketServerProvider extends DataProvider {
   };
 
   login(that: BitbucketServerProvider, input: LoginInput): Promise<void> {
+    console.log("login");
     that.loginInput = input;
     that.authVal = "Basic " + btoa( that.loginInput!.user + ":" + that.loginInput!.password );
     // test request
@@ -105,7 +112,7 @@ export class BitbucketServerProvider extends DataProvider {
   getData() {
     if(!this.loginInput) throw Error( "Connection parameters not set.");
     if(!this.data) {
-      this.data = this.makeRequest("/raw/"+this.loginInput!.path+"?at="+this.loginInput!.branch)
+      this.data = this.makeRequest({path: "/raw/"+this.loginInput!.path+"?at="+this.loginInput!.branch})
       .then( response => response.json())
       .then( data => {
         if (isArray(data)) return data as [];
@@ -122,7 +129,7 @@ export class BitbucketServerProvider extends DataProvider {
   getSchema() {
     if(!this.loginInput) throw Error( "Connection parameters not set.");
     if(!this.config) {
-      this.config = this.makeRequest("/raw/"+this.getSchemaPath()+"?at="+this.loginInput!.branch)
+      this.config = this.makeRequest({path: "/raw/"+this.getSchemaPath()+"?at="+this.loginInput!.branch})
       .then( response => response.json())
       .then( data => {
         if (isObject(data)) return data as {}
@@ -133,7 +140,7 @@ export class BitbucketServerProvider extends DataProvider {
   };
 
   rememberDataCommitId() {
-    this.dataCommitId = this.makeRequest("/commits?path="+this.loginInput!.path+"&until="+this.loginInput!.branch+"&limit=1")
+    this.dataCommitId = this.makeRequest({path: "/commits?path="+this.loginInput!.path+"&until="+this.loginInput!.branch+"&limit=1"})
     .then( response => response.json())
     .then( data => {
       if (data.values.length>0) {
@@ -161,7 +168,7 @@ export class BitbucketServerProvider extends DataProvider {
       postData.append("message", msg);
       postData.append("branch", this.loginInput!.branch!);     
 			postData.append("sourceCommitId", commitId!);
-      this.dataCommitId = this.makeRequest("/browse/"+this.loginInput!.path, "PUT", postData)
+      this.dataCommitId = this.makeRequest({path: "/browse/"+this.loginInput!.path, method: "PUT", body: postData})
       .then( response => response.json())
       .then( data => {
         console.log("new commitId", data);

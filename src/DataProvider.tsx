@@ -16,10 +16,6 @@ export abstract class DataProvider {
         const idCols: string[] = this.getMetadata(schema, "idCols");
         return data.forEach((e: any, idx) => this.addDataIdProperty(e, idCols.map(c => e[c]).join("-")));
       })
-      .catch(e => {
-        console.log("calcDataId Promise.all", String(e));
-        throw e;
-      });
     }
     addDataIdProperty(e: any, id: string) {
       // Object.defineProperty is used to create a property with enumerable: false, so that the artifical RECORD_ID property is not exported on save.

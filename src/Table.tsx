@@ -34,7 +34,7 @@ export default function Table(props: {show: boolean}) {
     showCommitDialog(false); // also refreshes button state
     // if msg is empty, commit dialog was cancelled
     if (msg) {
-      new Promise(() => {})
+      Promise.resolve()
       .then(() => provider.saveData(msg))
       .then(() => showSnackbar({msg: "Commit successfull", severity: "info"}))
       .catch(e => {
