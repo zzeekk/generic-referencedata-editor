@@ -23,8 +23,8 @@ var devProxy = createProxyMiddleware({
 
 var app = express();
 app.use('/api/server', bitbucketServerProxy);
-//app.use('/', express.static('build'));
-app.use('/', devProxy); // use to forward to dev server started with `yarn start
+app.use('/', express.static('build'));
+//app.use('/', devProxy); // use to forward to dev server started with `yarn start
 
 var privateKey  = fs.readFileSync(config.sslKeyFile, 'utf8');
 var certificate = fs.readFileSync(config.sslCertFile, 'utf8');

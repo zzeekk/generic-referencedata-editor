@@ -29,13 +29,14 @@ The backend provider can be selected on startup. Supported backend providers are
 Start a local https server to forward api request to repository server:
 * complete basic stpeps above
 * make sure nodejs is installed
+* `npm install express http-proxy-middleware`
 * create `config.json` with following properties:  
   - `port`: port to use
   - `bitbucketServerUrl` Bitbucket server Url  
   - `sslKeyFile` + `sslCertFile`: if you have no certificate for the server, you can create self-signed certificate for testing with the following steps:
     - openssl genrsa -out server.key 2048  
     - openssl req -new -key server.key -out server.crt.req
-    - openssl x509 -req -in server.crt.req -signkey server.key -out server.crt  
+    - openssl x509 -req -in server.crt.req -signkey server.key -out server.crt 
 * run server: `node serve.cjs`
 * open "https://localhost:<port>" in browser, choose Provider BitbucketServer
 
