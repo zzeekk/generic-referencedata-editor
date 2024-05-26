@@ -48,6 +48,7 @@ jobs:
           build/assets/*
           build/index.html
           serve.cjs
+          README.md
           
     - name: 'If build on master branch, bump version on develop'
       if: ${{ github.ref_name == 'master' }}
