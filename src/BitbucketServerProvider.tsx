@@ -51,7 +51,7 @@ function LoginForm(props: {provider: BitbucketServerProvider, defaults: LoginInp
 export class BitbucketServerProvider extends DataProvider {  
 
   // bitbucket server, according to https://docs.atlassian.com/bitbucket-server/rest/5.8.0/bitbucket-rest.html
-  // must use proxy at localhost /api/server because of CORS
+  // must use Proxy at localhost /api/server because of CORS
   private baseUrl = "/api/server/rest/api/1.0"
 
   // config variables
@@ -89,6 +89,7 @@ export class BitbucketServerProvider extends DataProvider {
     // prepare headers
     const headers = new Headers();
     headers.append("Authorization", this.authVal!);
+    headers.append("X-Authorization", this.authVal!); // if Authorization header is overwritten by Browser (Azure SSO), this can to be translated to Authorization Header by the backend Proxy
     // fetch
     return fetch(repoUrl+path, {method: method, headers: headers, body: body})
     .then( response => {
