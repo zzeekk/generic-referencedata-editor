@@ -12,7 +12,7 @@ interface LoginInput {
   password: string;
 }
 
-function LoginForm(props: {provider: BitbucketCloudProvider, defaults: LoginInput, login: (LoginInput) => void, setProvider: (DataProvider) => void}) {
+function LoginForm(props: {provider: BitbucketCloudProvider, defaults: LoginInput, login: (LoginInput) => void, setProvider: (DataProvider) => void, showError: (string) => void}) {
   const { handleSubmit, register, formState } = useForm<LoginInput>({      
     defaultValues: props.defaults,
   });
@@ -53,7 +53,7 @@ export class BitbucketCloudProvider extends DataProvider {
     return 'BitbucketCloud'
   };
 
-  private getConfigPath(): string {
+  private getSchemaPath(): string {
     if (this.loginInput!.path?.match(/\.json+$/)) {
       return this.loginInput!.path.replace(/\.json+$/, ".config.json"); // replace extension .json -> .config.json  
     } else {
@@ -77,8 +77,8 @@ export class BitbucketCloudProvider extends DataProvider {
     })
 	};
 	
-  getLoginForm(params: any, setProvider: (DataProvider) => void) {
-    return <LoginForm provider={this} defaults={params as LoginInput} login={x => this.login(this,x)} setProvider={setProvider}/>
+  getLoginForm(params: any, setProvider: (DataProvider) => void, showError: (string) => void) {
+    return <LoginForm provider={this} defaults={params as LoginInput} login={x => this.login(this,x)} setProvider={setProvider} showError={showError}/>
   };
 
   login(that: BitbucketCloudProvider, input: LoginInput) {
@@ -101,9 +101,9 @@ export class BitbucketCloudProvider extends DataProvider {
   getSchema() {
     if(!this.loginInput) throw Error( "Connection parameters not set.");
     if(!this.config) {
-      this.config = this.makeRequest("/"+this.loginInput!.branch+"/"+this.getConfigPath())
+      this.config = this.makeRequest("/"+this.loginInput!.branch+"/"+this.getSchemaPath())
       .then( response => response.json())
-      .then( data => (isObject(data) ? data as {}: Promise.reject("getConfig: response is not a JSon Object")));
+      .then( data => (isObject(data) ? data as {}: Promise.reject("getSchema: response is not a JSon Object")));
     }
     return this.config;
   };
@@ -119,13 +119,13 @@ export class BitbucketCloudProvider extends DataProvider {
 
   saveData(msg: string) {
     if(!this.loginInput) throw Error( "Connection parameters not set.");
-    this.data?.then(d => {
+    return this.data!.then(d => {
       var postData = new FormData();
       postData.append(this.loginInput!.path!, JSON.stringify(d,undefined,2));
       postData.append("message", msg);
       postData.append("branch", this.loginInput!.branch!);        
-      this.makeRequest("", "POST", postData);
-      this.changedRecords = []; // reset changed records
+      return this.makeRequest("", "POST", postData)
+      .then(() => {this.changedRecords = []}) // reset changed records
     });
   };
 }
