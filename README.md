@@ -39,6 +39,8 @@ Start a local https server to forward api request to repository server:
 * run server: `node serve.cjs`
 * open "https://localhost:<port>" in browser, choose Provider BitbucketServer
 
+Side note: with Azure Function App its possible to easily deploy managed Azure Functions, which could be used as backend api for forwarding requests. An example is included in Azurefunc.tgz.
+
 ## Build
 * make sure nodejs & npm are installed
 * clone git repository
