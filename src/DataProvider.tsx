@@ -1,4 +1,5 @@
 import { ReactElement } from "react";
+import { compareMultiFunc } from "./util/helpers";
 
 export const RECORD_ID = "_id";
 
@@ -7,9 +8,10 @@ export abstract class DataProvider {
     abstract getData(): Promise<[]>;
     abstract getSchema(): Promise<any>;
     abstract getName(): string;
-    abstract getDataName(): string;
-    abstract saveData(msg: string): Promise<void>;
+    abstract getDataName(): Promise<string>;
+    abstract saveData(msg?: string): Promise<void>;
     abstract canSaveData(): boolean;
+    abstract canSaveMsg(): boolean;
     calcDataId(): Promise<void> {
       return Promise.all([this.getSchema(),this.getData()])
       .then(([schema,data]) => {
@@ -46,18 +48,30 @@ export abstract class DataProvider {
       return this.changedRecords.length > 0;
     };
 
+    stringifyData(d: []): Promise<string> {
+      return this.getSchema().then(schema => {        
+        const idCols = this.getMetadata(schema, "idCols");
+        const dSorted = Object.assign([], d).sort(compareMultiFunc(idCols))
+        return JSON.stringify(dSorted,undefined,2)
+      });
+    }
+    
     /**
      * Download data array as file in browser
      */
     downloadData() {
       this.getData().then(d => {
-        const blob = new Blob([JSON.stringify(d)], {type: 'application/json'});
-        var csvURL = window.URL.createObjectURL(blob);
-        const tempLink = document.createElement('a');
-        tempLink.href = csvURL;
-        tempLink.setAttribute('download', this.getDataName()+'.json');
-        tempLink.click();
-        this.changedRecords = []; // reset changed records
+        this.stringifyData(d).then(dStr => {
+          const blob = new Blob([dStr], {type: 'application/json'});
+          var csvURL = window.URL.createObjectURL(blob);
+          const tempLink = document.createElement('a');
+          tempLink.href = csvURL;
+          this.getDataName().then(name => {
+            tempLink.setAttribute('download', name+'.json');
+            tempLink.click();
+            this.changedRecords = []; // reset changed records  
+          })
+        })
       });
     };    
 }

@@ -8,7 +8,7 @@ The Json Schema to edit a specified <dataset-name>.json file is named <dataset-n
 The Json Schema is used to create a generic form for editing a record. The form supports arrays and nested objects.
 https://jsonschema.net/ can create json schema's by example (disable all assertions and annotations).
 
-The schma file needs an additional "$metadata" attribute which can take the following properties:
+The schema file needs an additional "$metadata" attribute which can take the following properties:
 * `idCols` (required): list of primary key column(s) to uniquely identify records of the dataset
 * `tableCols` (required): list of columns to display in the table
 

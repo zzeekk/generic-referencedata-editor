@@ -30,19 +30,23 @@ export default function Table(props: {show: boolean}) {
     showCommitDialog(true);
   }
 
-  function save(msg?: string) {
+  function save(msg?: string) {    
     showCommitDialog(false); // also refreshes button state
     // if msg is empty, commit dialog was cancelled
-    if (msg) {
-      Promise.resolve()
-      .then(() => provider.saveData(msg))
-      .then(() => showSnackbar({msg: "Commit successfull", severity: "info"}))
-      .catch(e => {
-        showSnackbar({msg: String(e), severity: "error"});
-        throw e;
-      })
-    }
+    if (msg) saveData(msg);
   }  
+
+  function saveData(msg?: string) {
+    provider.saveData(msg)
+    .then(() => {
+      console.log("snack!")
+      showSnackbar({msg: (msg ? "Commit successfull" : "Save successfull"), severity: "info"})
+    })
+    .catch(e => {
+      showSnackbar({msg: String(e), severity: "error"});
+      throw e;
+    })
+  }
 
   function download() {
     provider.downloadData()
@@ -56,10 +60,10 @@ export default function Table(props: {show: boolean}) {
   const [searchText, setSearchText] = useState<string>();
   useEffect(() => {
     if (props.show) {
-      headerConfig.setTitle(provider.getDataName() + " Editor");
+      provider.getDataName().then(name => headerConfig.setTitle(name + " Editor"));
       headerConfig.setElements(<>
         {provider.canSaveData() && (
-          <IconButton key="save" edge="start" sx={{marginLeft: "5px"}} color={(provider?.changed() ? "error" : "inherit")} aria-label="menu" data-all={data} onClick={x => commit()}>
+          <IconButton key="save" edge="start" sx={{marginLeft: "5px"}} color={(provider?.changed() ? "error" : "inherit")} aria-label="menu" data-all={data} onClick={x => (provider.canSaveMsg() ? commit() : saveData())}>
             <Save />
           </IconButton>
         )}

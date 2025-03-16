@@ -94,12 +94,16 @@ export class UploadProvider extends DataProvider {
   };
   
   getDataName() {
-    return this.datasetName!;
+    return Promise.resolve(this.datasetName!);
   };
 
   canSaveData(): boolean {
-    return true;
+    return false;
   }
+
+  canSaveMsg(): boolean {
+    return false;
+  }  
 
   saveData(msg: string): Promise<void> {
     throw new Error("saveData not implemented");

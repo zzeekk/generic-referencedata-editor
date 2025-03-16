@@ -154,29 +154,36 @@ export class BitbucketServerProvider extends DataProvider {
   
   getDataName() {
     if(!this.loginInput) throw Error( "Connection parameters not set.");
-    return this.loginInput!.path.match(/([^\/]*)\.json$/)![1];
+    return Promise.resolve(this.loginInput!.path.match(/([^\/]*)\.json$/)![1]);
   };
 
   canSaveData(): boolean {
     return true;
   }
 
+  canSaveMsg(): boolean {
+    return true;
+  }
+
   saveData(msg: string) {
     if(!this.loginInput) throw Error( "Connection parameters not set.");
+    if(!msg) throw Error( "Commit message needed.");
     return Promise.all([this.data, this.dataCommitId]).then(([data,commitId]) => {
-      var postData = new FormData();
-      postData.append("content", JSON.stringify(data,undefined,2));
-      postData.append("message", msg);
-      postData.append("branch", this.loginInput!.branch!);     
-			postData.append("sourceCommitId", commitId!);
-      this.dataCommitId = this.makeRequest({path: "/browse/"+this.loginInput!.path, method: "PUT", body: postData})
-      .then( response => response.json())
-      .then( data => {
-        console.log("new commitId", data);
-        this.changedRecords = []; // reset changed records
-        return data.id;
+      return this.stringifyData(data!).then(dStr => {
+        var postData = new FormData();
+        postData.append("content", dStr);
+        postData.append("message", msg);
+        postData.append("branch", this.loginInput!.branch!);     
+        postData.append("sourceCommitId", commitId!);
+        this.dataCommitId = this.makeRequest({path: "/browse/"+this.loginInput!.path, method: "PUT", body: postData})
+        .then( response => response.json())
+        .then( data => {        
+          console.log("new commitId", data);
+          this.changedRecords = []; // reset changed records
+          return data.id;
+        });
+        return this.dataCommitId.then(() => {});
       });
-      return this.dataCommitId.then(() => {});
     });
   };
 }

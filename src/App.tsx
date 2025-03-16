@@ -1,4 +1,4 @@
-import { Box, CircularProgress, createTheme, CssBaseline, ThemeProvider } from '@mui/material';
+import { AlertColor, Box, CircularProgress, createTheme, CssBaseline, ThemeProvider } from '@mui/material';
 import React, { createContext, ReactElement, useMemo, useState } from 'react';
 import EditForm from './EditForm';
 import Login from './Login';

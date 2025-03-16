@@ -110,22 +110,29 @@ export class BitbucketCloudProvider extends DataProvider {
   
   getDataName() {
     if(!this.loginInput) throw Error( "Connection parameters not set.");
-    return this.loginInput!.path.match(/([^\/]*)\.json$/)![1];
+    return Promise.resolve(this.loginInput!.path.match(/([^\/]*)\.json$/)![1]);
   };
 
   canSaveData(): boolean {
     return true;
   }
+  
+  canSaveMsg(): boolean {
+    return true;
+  }
 
   saveData(msg: string) {
     if(!this.loginInput) throw Error( "Connection parameters not set.");
+    if(!msg) throw Error( "Commit message needed.");
     return this.data!.then(d => {
-      var postData = new FormData();
-      postData.append(this.loginInput!.path!, JSON.stringify(d,undefined,2));
-      postData.append("message", msg);
-      postData.append("branch", this.loginInput!.branch!);        
-      return this.makeRequest("", "POST", postData)
-      .then(() => {this.changedRecords = []}) // reset changed records
+      return this.stringifyData(d).then(dStr => {
+        var postData = new FormData();
+        postData.append(this.loginInput!.path!, dStr);
+        postData.append("message", msg);
+        postData.append("branch", this.loginInput!.branch!);        
+        return this.makeRequest("", "POST", postData)
+        .then(() => {this.changedRecords = []}) // reset changed records
+      });
     });
   };
 }

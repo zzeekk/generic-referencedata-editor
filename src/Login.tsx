@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import { BitbucketCloudProvider } from './BitbucketCloudProvider';
 import { UploadProvider } from './UploadProvider';
 import { BitbucketServerProvider } from './BitbucketServerProvider';
+import { LocalFileProvider } from './LocalFileProvider';
 
 export default function Login(props: {setDataProvider: (DataProvider) => void}) {
 
@@ -21,7 +22,7 @@ export default function Login(props: {setDataProvider: (DataProvider) => void}) 
     showSnackbar({msg: msg, severity: "error"})
   }
 
-  const dataProviderList = [new BitbucketServerProvider(), new BitbucketCloudProvider(), new UploadProvider()];
+  const dataProviderList = [new LocalFileProvider(), new BitbucketServerProvider(), new BitbucketCloudProvider(), new UploadProvider()];
 
   return (
     <Box sx={{display: 'flex', flexDirection: 'row', width: '100%'}}>
